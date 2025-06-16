@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recrut-o-mètre</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #0b1e3f;
+      color: #f0f0f0;
+      padding: 20px;
+      max-width: 700px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      color: #66ccff;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      background-color: #ffffff;
+      color: #000000;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 15px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 10px;
+      background-color: #fff3cd;
+      border: 1px solid #ffeeba;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔬 Recrut-o-mètre</h1>
+  <p>Simule la rareté d'un profil selon les critères d'une offre d'emploi !</p>
+
+  <form id="criteriaForm">
+    <label for="jobTitle">Intitulé du poste :</label>
+    <input type="text" id="jobTitle" placeholder="Ex : Assistant RH, Data Analyst...">
+
+    <label for="diploma">Diplôme requis :</label>
+    <select id="diploma">
+      <option>BEP/CAP</option>
+      <option>Bac</option>
+      <option>Bac+2</option>
+      <option>Bac+3</option>
+      <option>Bac+5</option>
+      <option>Doctorat</option>
+    </select>
+
+    <label for="experience">Années d'expérience :</label>
+    <input type="number" id="experience" min="0" max="50">
+
+    <label for="languages">Langues parlées (ex: anglais, espagnol...) :</label>
+    <input type="text" id="languages">
+
+    <label for="tools">Outils / logiciels maîtrisés (ex: Excel, Photoshop...) :</label>
+    <input type="text" id="tools">
+
+    <label for="location">Localisation géographique :</label>
+    <input type="text" id="location">
+
+    <button type="submit">Analyser 🔢</button>
+  </form>
+
+  <div class="result" id="result" style="display: none;"></div>
+
+  <script>
+    function calculateRarity(diploma, experience, languages, tools) {
+      let score = 100;
+      const diplomaLevels = {
+        "BEP/CAP": 100,
+        "Bac": 80,
+        "Bac+2": 60,
+        "Bac+3": 40,
+        "Bac+5": 20,
+        "Doctorat": 5
+      };
+      score *= diplomaLevels[diploma] / 100;
+
+      if (experience > 10) score *= 0.5;
+      else if (experience > 5) score *= 0.7;
+      else if (experience > 2) score *= 0.85;
+
+      const langCount = languages.split(',').filter(x => x.trim()).length;
+      const toolCount = tools.split(',').filter(x => x.trim()).length;
+
+      if (langCount > 1) score *= 0.7;
+      if (toolCount > 2) score *= 0.6;
+
+      return Math.max(score.toFixed(1), 0.1);
+    }
+
+    document.getElementById('criteriaForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const jobTitle = document.getElementById('jobTitle').value;
+      const diploma = document.getElementById('diploma').value;
+      const experience = parseInt(document.getElementById('experience').value || 0);
+      const languages = document.getElementById('languages').value;
+      const tools = document.getElementById('tools').value;
+
+      const rarity = calculateRarity(diploma, experience, languages, tools);
+
+      const resultDiv = document.getElementById('result');
+      resultDiv.style.display = 'block';
+      resultDiv.innerHTML = `
+        <h3>Résultat pour le poste : <em>${jobTitle || 'Non spécifié'}</em></h3>
+        <p>Le profil que vous recherchez correspond à environ <strong>${rarity}%</strong> des candidats théoriques.</p>
+        ${rarity < 5 ? '<p>🚨 <strong>Attention :</strong> Vos critères sont très restrictifs ! Vous limitez fortement le vivier de candidats.</p>' : ''}
+      `;
+    });
+  </script>
+</body>
+</html>
