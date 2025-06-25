@@ -1,6 +1,8 @@
 {
+  "id": "/",
   "name": "Recrut-o-mètre",
   "short_name": "Recruto",
+  "description": "Simulateur de rareté de profil pour les offres d'emploi.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0b1e3f",
