@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Recrut-o-mètre</title>
+  <title>Recrut-o-mètre - Version Réaliste</title>
+  <link rel="manifest" href="manifest.json">
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       background-color: #0b1e3f;
       color: #f0f0f0;
       padding: 20px;
@@ -21,7 +22,7 @@
       display: block;
       margin-top: 10px;
     }
-    input, select, textarea {
+    input, select {
       width: 100%;
       padding: 8px;
       margin-top: 5px;
@@ -39,125 +40,53 @@
       border-radius: 8px;
       cursor: pointer;
     }
-    button:hover {
-      background-color: #218838;
-    }
     .result {
       margin-top: 20px;
       padding: 15px;
       border-radius: 10px;
       background-color: #fff3cd;
-      border: 1px solid #ffeeba;
       color: #333;
+    }
+    footer {
+      margin-top: 40px;
+      font-size: 0.8em;
+      text-align: center;
+      color: #ccc;
     }
   </style>
 </head>
 <body>
   <h1>🔬 Recrut-o-mètre</h1>
-  <p>Simule la rareté d'un profil selon les critères d'une offre d'emploi !</p>
-
   <form id="criteriaForm">
-    <label for="jobTitle">Intitulé du poste :</label>
-    <input type="text" id="jobTitle" placeholder="Ex : Assistant RH, Data Analyst...">
+    <label>Intitulé du poste :</label>
+    <input type="text" id="jobTitle">
 
-    <label for="diploma">Diplôme requis :</label>
+    <label>Diplôme requis :</label>
     <select id="diploma">
-      <option>BEP/CAP</option>
-      <option>Bac</option>
-      <option>Bac+2</option>
-      <option>Bac+3</option>
-      <option>Bac+5</option>
-      <option>Doctorat</option>
+      <option>BEP/CAP</option><option>Bac</option><option>Bac+2</option><option>Bac+3</option><option>Bac+5</option><option>Doctorat</option>
     </select>
 
-    <label for="experience">Années d'expérience :</label>
-    <input type="number" id="experience" min="0" max="50">
+    <label>Expérience (années) :</label>
+    <input type="number" id="experience">
 
-    <label for="languages">Langues parlées (ex: anglais, espagnol...) :</label>
+    <label>Langues parlées :</label>
     <input type="text" id="languages">
 
-    <label for="tools">Outils / logiciels maîtrisés (ex: Excel, Photoshop...) :</label>
+    <label>Outils maîtrisés :</label>
     <input type="text" id="tools">
 
-    <label for="location">Localisation géographique :</label>
+    <label>Département (ex: 44) :</label>
     <input type="text" id="location">
 
-    <label for="jobSeekRate">Taux estimé de recherche d'emploi parmi les profils correspondants (en %) :</label>
-    <input type="number" id="jobSeekRate" min="1" max="100" value="10">
-
-    <button type="submit">Analyser 🔢</button>
+    <button type="submit">Analyser 🔍</button>
   </form>
 
   <div class="result" id="result" style="display: none;"></div>
 
-  <script>
-    function calculateFilteredPercentage(diploma, experience, languages, tools, jobSeekRate) {
-      let basePopulation = 100000;
-      let remaining = basePopulation;
+  <footer>
+    Données INSEE (2023), DARES / BMO France Travail (2024), retraitement OpenAI
+  </footer>
 
-      const diplomaFactor = {
-        "BEP/CAP": 1.0,
-        "Bac": 0.8,
-        "Bac+2": 0.6,
-        "Bac+3": 0.4,
-        "Bac+5": 0.2,
-        "Doctorat": 0.05
-      }[diploma] || 1.0;
-
-      remaining *= diplomaFactor;
-
-      if (experience > 10) remaining *= 0.5;
-      else if (experience > 5) remaining *= 0.7;
-      else if (experience > 2) remaining *= 0.85;
-
-      const langCount = languages.split(',').filter(x => x.trim()).length;
-      const toolCount = tools.split(',').filter(x => x.trim()).length;
-
-      if (langCount > 1) remaining *= 0.7;
-      if (toolCount > 2) remaining *= 0.6;
-
-      const matchingProfiles = Math.max(Math.round(remaining), 1);
-      const seekersRatio = jobSeekRate / 100;
-      const jobSeekers = Math.max(Math.round(matchingProfiles * seekersRatio), 1);
-
-      return {
-        total: matchingProfiles,
-        seekers: jobSeekers,
-        percent: (matchingProfiles / basePopulation * 100).toFixed(2),
-        percentSeekers: (jobSeekers / basePopulation * 100).toFixed(2)
-      };
-    }
-
-    document.getElementById('criteriaForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-
-      const jobTitle = document.getElementById('jobTitle').value;
-      const diploma = document.getElementById('diploma').value;
-      const experience = parseInt(document.getElementById('experience').value || 0);
-      const languages = document.getElementById('languages').value;
-      const tools = document.getElementById('tools').value;
-      const jobSeekRate = parseFloat(document.getElementById('jobSeekRate').value || 10);
-
-      const results = calculateFilteredPercentage(diploma, experience, languages, tools, jobSeekRate);
-
-      const resultDiv = document.getElementById('result');
-      resultDiv.style.display = 'block';
-      resultDiv.innerHTML = `
-        <h3>Résultat pour le poste : <em>${jobTitle || 'Non spécifié'}</em></h3>
-        <p><strong>${results.total}</strong> personnes dans la population répondent à ces critères (soit environ <strong>${results.percent}%</strong>).</p>
-        <p><strong>${results.seekers}</strong> d'entre elles seraient potentiellement <u>en recherche d'emploi</u> (≈ <strong>${results.percentSeekers}%</strong> de la population totale).</p>
-        ${results.percentSeekers < 0.5 ? '<p>🚨 <strong>Attention :</strong> Vos critères sont très restrictifs. Vous limitez fortement votre vivier de candidats disponibles.</p>' : ''}
-      `;
-    });
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
-<link rel="manifest" href="manifest.json">
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js')
-      .then(() => console.log("SW enregistré"))
-      .catch(err => console.error("SW erreur:", err));
-  }
-</script>
-
